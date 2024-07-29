@@ -18,5 +18,5 @@
 
 ________
 
-* MAIN.Rmd
-* pub_health_24.Rproj
+* MAIN.Rmd - файл с кодом для репликации в формате .rmd (R notebook)
+* pub_health_24.Rproj - файл с проектом
