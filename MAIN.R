@@ -69,10 +69,11 @@ for (i in 1960:1990){
 ledat$cnt = "RUS"
 
 ggplot(ledat[ledat$cnt == "RUS",], aes(year, le))+
-  geom_line(aes(color = sex), linewidth = 1.3)+
+  geom_line(aes(color = sex, linetype = sex), linewidth = 1.3)+
   theme_bw()+
-  labs(x = "Год", y = "ОПЖ (при рождении, лет)", color = "Пол:")+
+  labs(x = "Год", y = "ОПЖ (при рождении, лет)", color = "Пол:", linetype = "Пол:")+
   scale_color_manual(values = c("red", "darkblue"), labels = c("Женский", "Мужской"))+
+  scale_linetype_manual(values = c("solid", "twodash"), labels = c("Женский", "Мужской"))+
   geom_vline(xintercept = 2004, linetype = "dashed", alpha = 0.5, linewidth = 1.1)+
   scale_x_continuous(breaks = c(seq(1960, 2015, 5), 2019, 2022), guide = guide_axis(n.dodge = 2))
 
@@ -96,12 +97,14 @@ ledat1$sex = ifelse(ledat1$sex =="m", "Мужчины", "Женщины")
 
 ggplot(ledat1 %>% mutate(line = ifelse(cnt == "RUS", 0, 1)), 
        aes(year, le_pr, color = cnt, linetype = factor(line)))+
-  geom_line(size = 1)+
+  geom_line(size = 0.5)+
+  geom_point(aes(shape = cnt))+
   facet_grid(~sex)+
   theme_bw()+
   scale_y_continuous(labels = scales::percent)+
   scale_color_aaas()+
-  labs(x = "Год", y = "ОПЖ к 2000 году (%)", color = "Страна:")+
+  scale_shape_manual(values = c(5, 19:15))+
+  labs(x = "Год", y = "ОПЖ к 2000 году (%)", color = "Страна:", shape = "Страна:")+
   guides(linetype = "none")
 
 ggsave("plots/FIG_2.png", device = "png", dpi = 600, units = "cm", width = 20, height = 10)
@@ -109,11 +112,13 @@ ggsave("plots/FIG_2.png", device = "png", dpi = 600, units = "cm", width = 20, h
 
 ggplot(ledat %>% mutate(line = ifelse(cnt == "RUS", 0, 1)), 
        aes(year, le, color = cnt, linetype = factor(line)))+
-  geom_line()+
+  geom_line(size = 0.25)+
+  geom_point(aes(shape = cnt), size = 1)+
   facet_wrap(~sex1, nrow = 1)+
   theme_bw()+
-  labs(x = "Год", y = "ОПЖ при рождении (лет)", color = "Страна:")+
+  labs(x = "Год", y = "ОПЖ при рождении (лет)", color = "Страна:", shape = "Страна:")+
   scale_y_continuous(breaks = seq(55,90,5))+
+  scale_shape_manual(values = c(5, 19:15))+
   scale_x_continuous(breaks = c(seq(1960, 2020, 5)), guide = guide_axis(n.dodge = 2))+
   scale_color_aaas()+
   guides(linetype = "none")
@@ -335,7 +340,7 @@ decm <- mdecomp(mx1 = mxm1,
 )
 
 
-plot(decm) +
+plot(decm, return.data = F) +
   geom_bar(stat="identity", colour = "black", linewidth = 0.25)+
   theme_bw()+
   scale_fill_brewer(palette = "Set3")+
@@ -390,15 +395,17 @@ decf <- mdecomp(mx1 = mxf1,
                 age = unique(rostat_decomp$age)
 )
 
+
 plot(decf) +
   geom_bar(stat="identity", colour = "black", linewidth = 0.25)+
   theme_bw()+
   scale_fill_brewer(palette = "Set3")+
-  labs(x = "Возраст", y = "Вклад в разницу в ОПЖ (лет)", fill = "Причина (вклад):"
-  )+
+  labs(x = "Возраст", y = "Вклад в разницу в ОПЖ (лет)", fill = "Причина (вклад):")+
   annotate("text", x = 6, y = 0.85, label = paste0("Общая разница в ОПЖ = ", sum(decm[,2])))
 
 ggsave("plots/FIG_3b.png", device = "png", dpi = 600, units = "cm", width = 25, height = 15)
+
+
 
 ## ---- 3.5) FIG. 3 Support ----
 
@@ -461,7 +468,7 @@ preston %>%
   mutate(rus = factor(ifelse(iso3c == "RUS", 1, 0)),
          lab = ifelse(iso3c == "RUS", "RUSSIA", "")) %>% 
   ggplot(aes(x = gdppc))+
-  geom_point(aes(y = e0F, color = "Женщины", size = rus, alpha = rus))+
+  geom_point(aes(y = e0F, color = "Женщины", size = rus, alpha = rus), shape = 17)+
   geom_point(aes(y = e0M, color = "Мужчины", size = rus, alpha = rus))+
   theme_bw()+
   geom_smooth(aes(y = e0F, color = "Женщины"), 
@@ -498,13 +505,13 @@ comp.dat %>%
   mutate(rus = ifelse(iso3c == "RUS", 1, 0)) %>% 
   ggplot(aes(e0b.2000, e0b.2019))+
   geom_abline(intercept = 0, slope = 1)+
-  geom_point(aes(color = factor(rus), size = factor(rus)))+
+  geom_point(aes(color = factor(rus), size = factor(rus), shape = factor(rus)))+
   ggrepel::geom_text_repel(aes(label = iso3c), 
                            size = 2, color = "darkgreen")+
   theme_classic()+
   scale_color_manual(values = c("blue", "red"))+
   scale_size_manual(values = c(1, 3))+
-  guides(color = "none", size = "none")+
+  guides(color = "none", size = "none", shape = "none")+
   labs(x = "ОПЖ в 2000 году (Россия = 1)", y = "ОПЖ в 2019 году (Россия = 1)")
 
 ggsave("plots/SUPPORT_FIG_4.png", device = "png", dpi = 600, units = "cm", width = 20, height = 15)
@@ -730,16 +737,16 @@ alco %>%
     Dim1 == "Male" ~ "Мужчины",
     Dim1 == "Both sexes" ~ "Общее"
   )) %>% 
-  ggplot(aes(x = Period, y = FactValueNumeric, color = sex, fill = sex))+
-  geom_col(position = position_dodge(), alpha = 0.8, color = "white")+
+  ggplot(aes(x = Period, y = FactValueNumeric, fill = sex))+
+  geom_col(position = position_dodge(), color = "black", linewidth = 0.3)+
   geom_hline(yintercept = 8, linetype = "dashed")+
   theme_classic()+
   scale_y_continuous(
     name = "Абсолютное потребление\n(в литрах чистого спирта на душу)",
     sec.axis = sec_axis( trans=~.*(100/8), name = "Отклонение от 8л (в %)")
   )+
-  scale_fill_manual(values = c("deeppink2", "steelblue3", "forestgreen"))+
-  labs(fill = "", color = "", x = "Год")+
+  scale_fill_manual(values = c("white", "gray", "black"))+
+  labs(fill = "", color = "", x = "Год", fill = "", linetype = "")+
   theme(legend.position = "bottom")+
   scale_x_continuous(breaks = seq(2000,2020,2))+
   theme(axis.text.x = element_text(angle = 25, vjust = 1, hjust=1))
